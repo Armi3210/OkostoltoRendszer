@@ -11,6 +11,9 @@ public class Main {
         boolean leave = false;
         String a;
         do {
+            try{
+
+
             System.out.println("""
                     Please tell the brand and the id of the device,
                     which port do you want to use\
@@ -30,6 +33,10 @@ public class Main {
                             cstation.getPorts().get(Integer.parseInt(a.split(",")[2].strip()) - 1)) + " minutes!");
                     System.out.println(portRecommend(cstation));
                 } else {
+
+                    if(Integer.parseInt(st.nextToken().strip()) > 120){
+                        throw new DurationException("You want to charge your vehicle too long");
+                    }
                         cslist.add(new ChargingSession(st.nextToken().strip(), st.nextToken().strip(),
                                 cstation.getPorts().get(Integer.parseInt(st.nextToken().strip()) - 1),
                                 st.nextToken().strip(), Integer.parseInt(st.nextToken().strip())));
@@ -37,6 +44,9 @@ public class Main {
                     System.out.println("Charging Started!");
                 }
 
+            }}
+            catch (DurationException de){
+                System.out.println(de.getMessage());
             }
 
         } while (!leave);
