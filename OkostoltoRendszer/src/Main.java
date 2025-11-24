@@ -11,45 +11,80 @@ public class Main {
         boolean leave = false;
         String a;
         do {
-            try{
+            try {
+                System.out.println("""
+            Please tell the brand and the id of the device,
+            which port do you want to use
+            (1 - Ultra Fast, 2 - Fast, 3 - Fast, 4 - Normal, 5 - Normal, 6 - Slow),
+            the starting time (year-month-day hour:minute),
+            and the charging minutes.
 
+            If you want to leave, type 'exit'!
+        """);
 
-            System.out.println("""
-                    Please tell the brand and the id of the device,
-                    which port do you want to use\
-                    (1 - Ultra Fast, 2 - Fast, 3 - Fast, 4 - Normal, 5 - Normal, 6 - Slow),\
-                    
-                    the starting time (year-month-day hour:minute),
-                    and the charging minutes.
-                    
-                    If you want to leave, type 'exit'!""");
-            a = sc.nextLine();
-            leave = a.equals("exit");
-            if (!leave) {
-                StringTokenizer st = new StringTokenizer(a, ",");
-                if (portOccupied(cstation, Integer.parseInt(a.split(",")[2].strip()) - 1)) {
+                a = sc.nextLine().trim();
+                if (a.equalsIgnoreCase("exit")) {
+                    leave = true;
+                    break;
+                }
+
+                String[] parts = a.split(",");
+                if (parts.length != 5)
+                    throw new InvalidInputException("You must enter 5 comma-separated values!");
+
+                for (int i = 0; i < parts.length; i++)
+                    parts[i] = parts[i].trim();
+
+                // Port szám ellenőrzés
+                int portNum;
+                try {
+                    portNum = Integer.parseInt(parts[2]);
+                    if (portNum < 1 || portNum > cstation.getPorts().size())
+                        throw new InvalidInputException("Invalid port number!");
+                } catch (NumberFormatException e) {
+                    throw new InvalidInputException("Port number must be an integer!");
+                }
+
+                // Idő formátum ellenőrzés
+                if (!parts[3].matches("\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}"))
+                    throw new InvalidInputException("Invalid time format! Use: YYYY-MM-DD HH:MM");
+
+                // Időtartam ellenőrzés
+                int duration;
+                try {
+                    duration = Integer.parseInt(parts[4]);
+                    if (duration <= 0)
+                        throw new InvalidInputException("Duration must be positive!");
+                    if (duration > 120)
+                        throw new InvalidInputException("You want to charge your vehicle too long");
+                } catch (NumberFormatException e) {
+                    throw new InvalidInputException("Duration must be an integer!");
+                }
+
+                // Ha port foglalt
+                if (portOccupied(cstation, portNum - 1)) {
                     System.out.println("The selected port is occupied! It will be free after "
-                            + remainingMinutes(cslist, a.split(",")[3].strip(),
-                            cstation.getPorts().get(Integer.parseInt(a.split(",")[2].strip()) - 1)) + " minutes!");
+                            + remainingMinutes(cslist, parts[3],
+                            cstation.getPorts().get(portNum - 1)) + " minutes!");
                     System.out.println(portRecommend(cstation));
                 } else {
-
-                    if(Integer.parseInt(st.nextToken().strip()) > 120){
-                        throw new DurationException("You want to charge your vehicle too long");
-                    }
-                        cslist.add(new ChargingSession(st.nextToken().strip(), st.nextToken().strip(),
-                                cstation.getPorts().get(Integer.parseInt(st.nextToken().strip()) - 1),
-                                st.nextToken().strip(), Integer.parseInt(st.nextToken().strip())));
-
+                    StringTokenizer st = new StringTokenizer(a, ",");
+                    cslist.add(new ChargingSession(
+                            st.nextToken().strip(),
+                            st.nextToken().strip(),
+                            cstation.getPorts().get(Integer.parseInt(st.nextToken().strip()) - 1),
+                            st.nextToken().strip(),
+                            Integer.parseInt(st.nextToken().strip())
+                    ));
                     System.out.println("Charging Started!");
                 }
 
-            }}
-            catch (DurationException de){
-                System.out.println(de.getMessage());
+            } catch (InvalidInputException iie) {
+                System.out.println("Error: " + iie.getMessage());
             }
-
         } while (!leave);
+
+
         sc.close();
     }
 
