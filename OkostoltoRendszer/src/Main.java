@@ -1,4 +1,9 @@
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Scanner;
 import java.util.StringTokenizer;
 
@@ -25,7 +30,6 @@ public class Main {
                 a = sc.nextLine().trim();
                 if (a.equalsIgnoreCase("exit")) {
                     leave = true;
-                    break;
                 }
 
                 String[] parts = a.split(",");
@@ -61,7 +65,6 @@ public class Main {
                     throw new InvalidInputException("Duration must be an integer!");
                 }
 
-                // Ha port foglalt
                 if (portOccupied(cstation, portNum - 1)) {
                     System.out.println("The selected port is occupied! It will be free after "
                             + remainingMinutes(cslist, parts[3],
@@ -76,14 +79,36 @@ public class Main {
                             st.nextToken().strip(),
                             Integer.parseInt(st.nextToken().strip())
                     ));
+                    ChargingSession cs = cslist.getLast();
+                    System.out.println("The price of this charging: "+cs.priceCalculation()+" Ft");
+                    String b="";
+                    boolean done = false;
+                    do {
+                        System.out.println("If you want to cancel the charging, write 'cancel'!\nIf you want to pay with card, write 'pay'!");
+                        b = sc.nextLine();
+                        if (b.equals("cancel")) {
+                            System.out.println("You cancelled the charging! See you later!");
+                            done = true;
+                        } else if (b.equals("pay")) {
+                            System.out.println("Thank you for charging here!");
+                            done = true;
+                            File f = new File("OkostoltoRendszer/Data/"+cs.getStartTime().split(" ")[0]);
+                            FileWriter fw = new FileWriter(f);
+                            fw.append(cs.getDeviceID()).append(cs.getDeviceBrand()).append(String.valueOf(cs.getChargingPort())).append(cs.getStartTime()).append(String.valueOf(cs.getDurationMinutes())).append(String.valueOf(cs.priceCalculation())).append("\n");
+                        }
+                    } while (!done);
                     System.out.println("Charging Started!");
                 }
 
             } catch (InvalidInputException iie) {
                 System.out.println("Error: " + iie.getMessage());
+            } catch (IOException ioe) {
+                System.out.println("Error at file writing");
             }
         } while (!leave);
-
+        for (float f : statCalculation(cslist,cstation)) {
+            System.out.println(f+"%");
+        }
 
         sc.close();
     }
@@ -119,5 +144,20 @@ public class Main {
             }
     }
         return "";
-    }}
+    }
+    public static Float[] statCalculation(ArrayList<ChargingSession> cslist, ChargingStation cstation){
+        Float[] stats = new Float[6];
+        for (ChargingSession cs : cslist) {
+            for (int i = 0; i < 6; i++) {
+                if(cstation.getPorts().indexOf(cs.getChargingPort()) == i) {
+                    stats[i]++;
+                }
+            }
+        }
+        for (float a : stats) {
+            a = a/cslist.size()*100;
+        }
+        return stats;
+    }
+}
 //
