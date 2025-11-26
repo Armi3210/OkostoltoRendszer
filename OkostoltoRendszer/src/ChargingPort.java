@@ -1,5 +1,5 @@
 public class ChargingPort {
-    private ChargeType chargeType;
+    private final ChargeType chargeType;
     private boolean occupied = false;
 
     public ChargingPort(ChargeType chargeType) {
@@ -16,8 +16,5 @@ public class ChargingPort {
 
     public void StartCharging() {
         this.occupied=true;
-    }
-    public void EndCharging() {
-        this.occupied=false;
     }
 }
