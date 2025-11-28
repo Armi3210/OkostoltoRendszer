@@ -1,9 +1,7 @@
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Scanner;
 import java.util.StringTokenizer;
 
@@ -91,7 +89,7 @@ public class Main {
                                 done = true;
                                 File dir = new File("OkostoltoRendszer/Data");
                                 if (!dir.exists()) {
-                                    dir.mkdirs();
+                                    dir.mkdir();
                                 }
                                 File f = new File(dir, cs.getStartTime().split(" ")[0] + ".txt");
 
@@ -118,6 +116,11 @@ public class Main {
         for (float f : statCalculation(cslist,cstation)) {
             System.out.println(f+"%");
         } } catch (NullPointerException npe) {}
+        float sum = 0;
+        for (ChargingSession cs : cslist) {
+            sum+=cs.priceCalculation();
+        }
+        System.out.println("Total revenue: "+sum);
 
         sc.close();
     }
