@@ -124,7 +124,7 @@ public class Main implements iBrands{
         }
         try {
         Float[] stats = statCalculation(cslist, cstation);
-        System.out.println("Total revenue: " + sum);
+        System.out.println("Total revenue: " + sum+" Ft");
         System.out.println("Usement rate of ports:\nUltra Fast: "
                 + stats[0]
                 + "%\nFast1: "
@@ -138,6 +138,7 @@ public class Main implements iBrands{
                 + "%\nSlow: "
                 + stats[5] + "%"
         );} catch (NullPointerException _) {}
+        System.out.println("All charging minutes: "+sumMinutes(cslist));
         sc.close();
     }
 
@@ -177,6 +178,14 @@ public class Main implements iBrands{
             }
         }
         return false;
+    }
+
+    public static int sumMinutes(ArrayList<ChargingSession> cslist) {
+        int sum = 0;
+        for(ChargingSession cs : cslist) {
+            sum+=cs.getDurationMinutes();
+        }
+        return sum;
     }
 
     public static Float[] statCalculation(ArrayList<ChargingSession> cslist, ChargingStation cstation){
