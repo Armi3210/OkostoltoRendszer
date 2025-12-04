@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.StringTokenizer;
 
-public class Main {
+public class Main implements iBrands{
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
         ChargingStation cstation = new ChargingStation();
@@ -16,11 +16,13 @@ public class Main {
         do {
             try {
                 System.out.println("""
-            Please tell the brand and the id of the device,
+            Please tell the id and the brand of the car,
             which port do you want to use
             (1 - Ultra Fast, 2 - Fast, 3 - Fast, 4 - Normal, 5 - Normal, 6 - Slow),
             the starting time (year-month-day hour:minute),
             and the charging minutes.
+            
+            (Example: AAA111, Ford, 1, 2001-09-11 09:11, 60)
 
             If you want to leave, type 'exit'!
             """);
@@ -60,7 +62,8 @@ public class Main {
                         throw new InvalidInputException("Duration must be an integer!");
                     }
 
-                    if (portOccupied(cstation, portNum - 1)) {
+                    if (remainingMinutes(cslist, parts[3],
+                            cstation.getPorts().get(portNum - 1)) != 0) {
                         System.out.println("The selected port is occupied! It will be free after "
                                 + remainingMinutes(cslist, parts[3],
                                 cstation.getPorts().get(portNum - 1)) + " minutes!");
@@ -75,6 +78,9 @@ public class Main {
                                 Integer.parseInt(st.nextToken().strip())
                         ));
                         ChargingSession cs = cslist.getLast();
+                        if(hasDiscount(cs)) {
+                            System.out.println("You have a discount! You pay 20% less!");
+                        }
                         System.out.println("The price of this charging: " + cs.priceCalculation() + " Ft");
                         String b;
                         boolean done = false;
@@ -112,21 +118,27 @@ public class Main {
                 System.out.println("Error: " + iie.getMessage());
             }
         } while (!leave);
-        try {
-        for (float f : statCalculation(cslist,cstation)) {
-            System.out.println(f+"%");
-        } } catch (NullPointerException npe) {}
         float sum = 0;
         for (ChargingSession cs : cslist) {
             sum+=cs.priceCalculation();
         }
-        System.out.println("Total revenue: "+sum);
-
+        try {
+        Float[] stats = statCalculation(cslist, cstation);
+        System.out.println("Total revenue: " + sum);
+        System.out.println("Usement rate of ports:\nUltra Fast: "
+                + stats[0]
+                + "%\nFast1: "
+                + stats[1]
+                + "%\nFast2: "
+                + stats[2]
+                + "%\nNormal1: "
+                + stats[3]
+                + "%\nNormal2: "
+                + stats[4]
+                + "%\nSlow: "
+                + stats[5] + "%"
+        );} catch (NullPointerException _) {}
         sc.close();
-    }
-
-    public static boolean portOccupied(ChargingStation cstation, int portNumber) {
-        return cstation.getPorts().get(portNumber).isOccupied();
     }
 
     public static int remainingMinutes(ArrayList<ChargingSession> cslist,String time, ChargingPort port) {
@@ -142,9 +154,9 @@ public class Main {
 
             if (cs.getChargingPort().equals(port)
                     && tDate.equals(csDate)
-                    && tMinutes > csMinutes
-                    && tMinutes< csMinutes+cs.getDurationMinutes()) {
-                return csMinutes-tMinutes;
+                    && tMinutes >= csMinutes
+                    && tMinutes < csMinutes+cs.getDurationMinutes()) {
+                return csMinutes-tMinutes+cs.getDurationMinutes();
             }
             }
         return 0;
@@ -157,8 +169,21 @@ public class Main {
     }
         return "";
     }
+
+    public static boolean hasDiscount(ChargingSession cs) {
+        for (String s : MARKAK) {
+            if(s.equals(cs.getDeviceBrand())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public static Float[] statCalculation(ArrayList<ChargingSession> cslist, ChargingStation cstation){
         Float[] stats = new Float[6];
+        for (int i = 0; i < 6; i++) {
+            stats[i] = (float) 0;
+        }
         for (ChargingSession cs : cslist) {
             for (int i = 0; i < 6; i++) {
                 if(cstation.getPorts().indexOf(cs.getChargingPort()) == i) {
@@ -169,7 +194,9 @@ public class Main {
         int i = 0;
         for (float a : stats) {
             a = a/cslist.size()*100;
-            stats[i] = a;
+            if(!Float.isNaN(a)) {
+                stats[i] = a;
+            }
             i++;
         }
         return stats;
