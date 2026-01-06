@@ -2,6 +2,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.Scanner;
 import java.util.StringTokenizer;
 
@@ -158,6 +159,11 @@ public class Main implements iBrands{
             String csDate = csParts[0];
             String[] csHM = csParts[1].split(":");
             int csMinutes = Integer.parseInt(csHM[0]) * 60 + Integer.parseInt(csHM[1]);
+            if (csMinutes+cs.getDurationMinutes()-24*60 >= tMinutes && Objects.equals(csDate.split("-")[0], tDate.split("-")[0]) &&
+                    Objects.equals(csDate.split("-")[1], tDate.split("-")[1])
+                    && Integer.parseInt(csDate.split("-")[2])+1==Integer.parseInt(tDate.split("-")[2])){
+                return csMinutes-tMinutes+cs.getDurationMinutes()-24*60;
+            }
 
             if (cs.getChargingPort().equals(port)
                     && tDate.equals(csDate)
