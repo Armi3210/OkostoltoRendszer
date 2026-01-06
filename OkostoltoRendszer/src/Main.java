@@ -10,10 +10,12 @@ public class Main implements iBrands{
         Scanner sc = new Scanner(System.in);
         ChargingStation cstation = new ChargingStation();
         ArrayList<ChargingSession> cslist = new ArrayList<>();
+        boolean canceled = false;
 
         boolean leave = false;
         String a;
         do {
+            canceled=false;
             try {
                 System.out.println("""
             Please tell the id and the brand of the car,
@@ -67,7 +69,7 @@ public class Main implements iBrands{
                         System.out.println("The selected port is occupied! It will be free after "
                                 + remainingMinutes(cslist, parts[3],
                                 cstation.getPorts().get(portNum - 1)) + " minutes!");
-                        System.out.println(portRecommend(cstation));
+                        System.out.println(portRecommend(cstation,cslist,parts[3]));
                     } else {
                         StringTokenizer st = new StringTokenizer(a, ",");
                         cslist.add(new ChargingSession(
@@ -90,6 +92,8 @@ public class Main implements iBrands{
                             if (b.equals("cancel")) {
                                 System.out.println("You cancelled the charging! See you later!");
                                 done = true;
+                                canceled = true;
+                                cslist.remove(cs);
                             } else if (b.equals("pay")) {
                                 System.out.println("Thank you for charging here!");
                                 done = true;
@@ -106,12 +110,14 @@ public class Main implements iBrands{
                                     fw.write(cs.getStartTime() + ", ");
                                     fw.write(cs.getDurationMinutes() + ", ");
                                     fw.write(cs.priceCalculation() + "\n");
+                                    fw.close();
                                 } catch (IOException ioe) {
                                     System.out.println("Error at file writing");
                                 }
                             }
                         } while (!done);
-                        System.out.println("Charging Started!");
+                        if(!canceled){
+                        System.out.println("Charging Started!");}
                     }
 
                 }} catch (InvalidInputException iie) {
@@ -162,8 +168,11 @@ public class Main implements iBrands{
             }
         return 0;
         }
-    public static String portRecommend(ChargingStation cstation) {
+    public static String portRecommend(ChargingStation cstation, ArrayList<ChargingSession> cslist, String a) {
         for (ChargingPort port : cstation.getPorts()) {
+            if(!(remainingMinutes(cslist, a, port)>0)) {
+                port.StopCharging();
+            }
             if(!port.isOccupied()) {
                 return "You can use a "+port.getChargeType()+" charger instead!";
             }

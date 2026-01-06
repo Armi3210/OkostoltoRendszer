@@ -17,4 +17,6 @@ public class ChargingPort {
     public void StartCharging() {
         this.occupied=true;
     }
+
+    public void StopCharging(){this.occupied=false;}
 }
