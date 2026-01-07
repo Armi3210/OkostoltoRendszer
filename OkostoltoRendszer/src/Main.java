@@ -6,7 +6,7 @@ import java.util.Objects;
 import java.util.Scanner;
 import java.util.StringTokenizer;
 
-public class Main implements iBrands{
+public class Main implements iBrands, iDays{
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
         ChargingStation cstation = new ChargingStation();
@@ -53,6 +53,14 @@ public class Main implements iBrands{
 
                     if (!parts[3].matches("\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}"))
                         throw new InvalidInputException("Invalid time format! Use: YYYY-MM-DD HH:MM");
+                    else if(DAYS[Integer.parseInt(parts[3].split(" ")[0].split("-")[1])-1] < Integer.parseInt(parts[3].split(" ")[0].split("-")[2])) {
+                        if (!((Objects.equals(parts[3].split(" ")[0].split("-")[1], "02"))
+                                && (Objects.equals(parts[3].split(" ")[0].split("-")[2], "29"))
+                                && ((Integer.parseInt(parts[3].split(" ")[0].split("-")[0]) % 4) == 0)))
+                            throw new InvalidInputException("Invalid date!");
+                    }
+                    else if((Integer.parseInt(parts[3].split(" ")[1].split(":")[0])>24) || (Integer.parseInt(parts[3].split(" ")[1].split(":")[1])>59))
+                        throw new InvalidInputException("Invalid time!");
 
                     int duration;
                     try {
@@ -90,12 +98,12 @@ public class Main implements iBrands{
                         do {
                             System.out.println("If you want to cancel the charging, write 'cancel'!\nIf you want to pay with card, write 'pay'!");
                             b = sc.nextLine();
-                            if (b.equals("cancel")) {
+                            if (b.equalsIgnoreCase("cancel")) {
                                 System.out.println("You cancelled the charging! See you later!");
                                 done = true;
                                 canceled = true;
                                 cslist.remove(cs);
-                            } else if (b.equals("pay")) {
+                            } else if (b.equalsIgnoreCase("pay")) {
                                 System.out.println("Thank you for charging here!");
                                 done = true;
                                 File dir = new File("OkostoltoRendszer/Data");
@@ -159,10 +167,22 @@ public class Main implements iBrands{
             String csDate = csParts[0];
             String[] csHM = csParts[1].split(":");
             int csMinutes = Integer.parseInt(csHM[0]) * 60 + Integer.parseInt(csHM[1]);
-            if (csMinutes+cs.getDurationMinutes()-24*60 >= tMinutes && Objects.equals(csDate.split("-")[0], tDate.split("-")[0]) &&
-                    Objects.equals(csDate.split("-")[1], tDate.split("-")[1])
-                    && Integer.parseInt(csDate.split("-")[2])+1==Integer.parseInt(tDate.split("-")[2])){
-                return csMinutes-tMinutes+cs.getDurationMinutes()-24*60;
+            if(csMinutes+cs.getDurationMinutes()-24*60 >= tMinutes) {
+                if (Objects.equals(csDate.split("-")[0], tDate.split("-")[0]) &&
+                        Objects.equals(csDate.split("-")[1], tDate.split("-")[1])
+                        && Integer.parseInt(csDate.split("-")[2])+1==Integer.parseInt(tDate.split("-")[2])){
+                    return csMinutes-tMinutes+cs.getDurationMinutes()-24*60;
+                }
+                else if (Objects.equals(csDate.split("-")[0], tDate.split("-")[0]) &&
+                        Objects.equals(Integer.parseInt(csDate.split("-")[1]), Integer.parseInt(tDate.split("-")[1])-1)
+                        && Objects.equals(Integer.parseInt(csDate.split("-")[2]),DAYS[Integer.parseInt(csDate.split("-")[1])-1]) && Objects.equals(tDate.split("-")[2],"01")){
+                    return csMinutes-tMinutes+cs.getDurationMinutes()-24*60;
+                }
+                else if (Objects.equals(Integer.parseInt(csDate.split("-")[0]), Integer.parseInt(tDate.split("-")[0])+1) &&
+                        Objects.equals(csDate.split("-")[1], "12") && Objects.equals(tDate.split("-")[1], "01")
+                        && Objects.equals(csDate.split("-")[2],"31") && Objects.equals(tDate.split("-")[2],"01")){
+                    return csMinutes-tMinutes+cs.getDurationMinutes()-24*60;
+                }
             }
 
             if (cs.getChargingPort().equals(port)
@@ -187,8 +207,8 @@ public class Main implements iBrands{
     }
 
     public static boolean hasDiscount(ChargingSession cs) {
-        for (String s : MARKAK) {
-            if(s.equals(cs.getDeviceBrand())) {
+        for (String s : BRANDS) {
+            if(s.equalsIgnoreCase(cs.getDeviceBrand())) {
                 return true;
             }
         }

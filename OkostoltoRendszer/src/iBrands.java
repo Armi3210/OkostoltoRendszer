@@ -1,5 +1,3 @@
 public interface iBrands {
-
-    final String[] MARKAK = {"Tesla", "Hyundai", "Volkswagen"};
-
+    final String[] BRANDS = {"Tesla", "Hyundai", "Volkswagen"};
 }

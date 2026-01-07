@@ -25,7 +25,7 @@ public class ChargingSession implements iBrands{
         } else {
             price = ((float)durationMinutes/60) * 2000;
         }
-        for (String s : MARKAK) {
+        for (String s : BRANDS) {
             if (s.equalsIgnoreCase(this.getDeviceBrand())) {
                 price *= 0.8F;
             }
