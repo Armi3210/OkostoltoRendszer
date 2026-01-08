@@ -53,7 +53,7 @@ public class Main implements iBrands, iDays{
 
                     if (!parts[3].matches("\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}"))
                         throw new InvalidInputException("Invalid time format! Use: YYYY-MM-DD HH:MM");
-                    else if(DAYS[Integer.parseInt(parts[3].split(" ")[0].split("-")[1])-1] < Integer.parseInt(parts[3].split(" ")[0].split("-")[2])) {
+                    else if((Integer.parseInt(parts[3].split(" ")[0].split("-")[1])>DAYS.length)|| Objects.equals(parts[3].split(" ")[0].split("-")[2], "00") ||(Integer.parseInt(parts[3].split(" ")[0].split("-")[1])<1)||DAYS[Integer.parseInt(parts[3].split(" ")[0].split("-")[1])-1] < Integer.parseInt(parts[3].split(" ")[0].split("-")[2])) {
                         if (!((Objects.equals(parts[3].split(" ")[0].split("-")[1], "02"))
                                 && (Objects.equals(parts[3].split(" ")[0].split("-")[2], "29"))
                                 && ((Integer.parseInt(parts[3].split(" ")[0].split("-")[0]) % 4) == 0)
@@ -176,7 +176,12 @@ public class Main implements iBrands, iDays{
                 }
                 else if (Objects.equals(csDate.split("-")[0], tDate.split("-")[0]) &&
                         Objects.equals(Integer.parseInt(csDate.split("-")[1]), Integer.parseInt(tDate.split("-")[1])-1)
-                        && Objects.equals(Integer.parseInt(csDate.split("-")[2]),DAYS[Integer.parseInt(csDate.split("-")[1])-1]) && Objects.equals(tDate.split("-")[2],"01")){
+                        && (Objects.equals(Integer.parseInt(csDate.split("-")[2]),DAYS[Integer.parseInt(csDate.split("-")[1])-1]) && Objects.equals(tDate.split("-")[2],"01"))
+                        || ((Objects.equals(csDate.split(" ")[0].split("-")[1], "02"))
+                        && (Objects.equals(csDate.split(" ")[0].split("-")[2], "29"))
+                        && ((Integer.parseInt(csDate.split(" ")[0].split("-")[0]) % 4) == 0)
+                        && ((Integer.parseInt(csDate.split(" ")[0].split("-")[0])%100 != 0)
+                        || (Integer.parseInt(csDate.split(" ")[0].split("-")[0])%400 == 0)))){
                     return csMinutes-tMinutes+cs.getDurationMinutes()-24*60;
                 }
                 else if (Objects.equals(Integer.parseInt(csDate.split("-")[0]), Integer.parseInt(tDate.split("-")[0])+1) &&
