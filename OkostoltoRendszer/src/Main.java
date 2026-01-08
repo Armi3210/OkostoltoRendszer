@@ -56,10 +56,11 @@ public class Main implements iBrands, iDays{
                     else if(DAYS[Integer.parseInt(parts[3].split(" ")[0].split("-")[1])-1] < Integer.parseInt(parts[3].split(" ")[0].split("-")[2])) {
                         if (!((Objects.equals(parts[3].split(" ")[0].split("-")[1], "02"))
                                 && (Objects.equals(parts[3].split(" ")[0].split("-")[2], "29"))
-                                && ((Integer.parseInt(parts[3].split(" ")[0].split("-")[0]) % 4) == 0)))
+                                && ((Integer.parseInt(parts[3].split(" ")[0].split("-")[0]) % 4) == 0)
+                                && ((Integer.parseInt(parts[3].split(" ")[0].split("-")[0])%100 != 0) || (Integer.parseInt(parts[3].split(" ")[0].split("-")[0])%400 == 0))))
                             throw new InvalidInputException("Invalid date!");
                     }
-                    else if((Integer.parseInt(parts[3].split(" ")[1].split(":")[0])>24) || (Integer.parseInt(parts[3].split(" ")[1].split(":")[1])>59))
+                    else if((Integer.parseInt(parts[3].split(" ")[1].split(":")[0])>23) || (Integer.parseInt(parts[3].split(" ")[1].split(":")[1])>59))
                         throw new InvalidInputException("Invalid time!");
 
                     int duration;
