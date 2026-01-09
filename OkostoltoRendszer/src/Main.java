@@ -39,6 +39,11 @@ public class Main implements iBrands, iDays{
                     if (parts.length != 5)
                         throw new InvalidInputException("You must enter 5 comma-separated values!");
 
+                    for (int i = 0; i < parts.length; i++) {
+                        if(Objects.equals(parts[i].trim(), ""))
+                        throw new InvalidInputException("You can't enter empty values!");
+                    }
+
                     for (int i = 0; i < parts.length; i++)
                         parts[i] = parts[i].trim();
 
@@ -53,7 +58,12 @@ public class Main implements iBrands, iDays{
 
                     if (!parts[3].matches("\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}"))
                         throw new InvalidInputException("Invalid time format! Use: YYYY-MM-DD HH:MM");
-                    else if((Integer.parseInt(parts[3].split(" ")[0].split("-")[1])>DAYS.length)|| Objects.equals(parts[3].split(" ")[0].split("-")[2], "00") ||(Integer.parseInt(parts[3].split(" ")[0].split("-")[1])<1)||DAYS[Integer.parseInt(parts[3].split(" ")[0].split("-")[1])-1] < Integer.parseInt(parts[3].split(" ")[0].split("-")[2])) {
+                    else if(Objects.equals(parts[3].split(" ")[0].split("-")[0], "0000")
+                            ||(Integer.parseInt(parts[3].split(" ")[0].split("-")[1])>DAYS.length)
+                            || Objects.equals(parts[3].split(" ")[0].split("-")[2], "00")
+                            ||(Integer.parseInt(parts[3].split(" ")[0].split("-")[1])<1)
+                            ||DAYS[Integer.parseInt(parts[3].split(" ")[0].split("-")[1])-1]
+                            < Integer.parseInt(parts[3].split(" ")[0].split("-")[2])) {
                         if (!((Objects.equals(parts[3].split(" ")[0].split("-")[1], "02"))
                                 && (Objects.equals(parts[3].split(" ")[0].split("-")[2], "29"))
                                 && ((Integer.parseInt(parts[3].split(" ")[0].split("-")[0]) % 4) == 0)
@@ -109,7 +119,7 @@ public class Main implements iBrands, iDays{
                                 done = true;
                                 File dir = new File("OkostoltoRendszer/Data");
                                 if (!dir.exists()) {
-                                    dir.mkdir();
+                                    dir.mkdirs();
                                 }
                                 File f = new File(dir, cs.getStartTime().split(" ")[0] + ".txt");
 
